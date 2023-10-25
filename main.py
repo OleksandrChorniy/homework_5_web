@@ -35,6 +35,20 @@ async def main(index_day):
         return None
 
 
+def parse_currency_data(data):
+    result = []
+    for currency in data['exchangeRate']:
+        if currency['currency'] in ['USD', 'EUR']:
+            currency_info = {
+                currency['currency']: {
+                    'sale': currency['saleRateNB'],
+                    'purchase': currency['purchaseRateNB']
+                }
+            }
+            result.append({data['date']: currency_info})
+    return result
+
+
 if __name__ == "__main__":
     if platform.system() == "Windows":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -42,6 +56,11 @@ if __name__ == "__main__":
         index_day = int(sys.argv[1])
         if index_day > 10:
             raise ValueError("The number of days should be from 1 to 10.")
+        else:
+            response_data = asyncio.run(main(index_day))
+            if response_data:
+                parsed_data = parse_currency_data(response_data)
+                print(parsed_data)
     except (ValueError, IndexError):
         print("Usage: number of days (1-10)")
         sys.exit(1)
